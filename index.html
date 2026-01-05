@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chú Ong Chăm Chỉ - Làm Bài Tập</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Modal chung */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 24px;
+      padding: 28px 24px;
+      width: 92%;
+      max-width: 580px;
+      max-height: 88vh;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      transform: scale(0.75);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal.active {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .bee {
+      font-size: 78px;
+      margin-bottom: 16px;
+      animation: wave 2.2s infinite ease-in-out;
+      display: inline-block;
+      transform-origin: bottom;
+    }
+
+    @keyframes wave {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(14deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(8deg); }
+    }
+
+    h1, h2 {
+      font-family: 'Varela Round', sans-serif;
+      color: #2c3e50;
+      margin-bottom: 16px;
+    }
+
+    h1 { font-size: 32px; }
+    h2 { font-size: 26px; }
+
+    p {
+      font-size: 17px;
+      color: #5d6d7e;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .btn {
+      padding: 14px 36px;
+      font-size: 17px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.28s ease;
+    }
+
+    .btn-primary {
+      background: #feca57;
+      color: #2c3e50;
+      box-shadow: 0 6px 0 #ff9f1a;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 0 #ff9f1a;
+    }
+
+    .btn-secondary {
+      background: #dfe6e9;
+      color: #636e72;
+      box-shadow: 0 6px 0 #b2bec3;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #b2bec3;
+    }
+
+    .btn-vocab {
+      background: #a29bfe;
+      color: white;
+      box-shadow: 0 6px 0 #6c5ce7;
+      font-size: 17px;
+      padding: 15px 38px;
+    }
+
+    .btn-vocab:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 0 #6c5ce7;
+    }
+
+    .countdown {
+      font-size: 54px;
+      font-weight: 700;
+      color: #e17055;
+      margin: 20px 0;
+    }
+
+    .small-text {
+      font-size: 15px;
+      color: #999;
+      margin-top: 16px;
+    }
+
+    /* Màn hình chính khi tắt pop-up */
+    #mainScreen {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+    }
+
+    #mainScreen .bee-big {
+      font-size: 120px;
+      margin-bottom: 24px;
+      animation: wave 2.8s infinite ease-in-out;
+    }
+
+    .hidden { display: none; }
+
+    /* Bảng từ vựng */
+    .vocab-container {
+      flex: 1;
+      overflow-y: auto;
+      margin: 16px 0;
+      padding-right: 6px;
+      max-height: 55vh;
+    }
+
+    .vocab-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      text-align: left;
+    }
+
+    .vocab-table th, .vocab-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .vocab-table th {
+      background: #f8f9fa;
+      color: #2c3e50;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      backdrop-filter: blur(4px);
+    }
+
+    .vocab-table tr:hover {
+      background: #f0f4f8;
+    }
+
+    .vocab-table .word {
+      font-weight: 600;
+      color: #0984e3;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 32px;
+      color: #b2bec3;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .vocab-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .vocab-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .vocab-container::-webkit-scrollbar-thumb {
+      background: #a29bfe;
+      border-radius: 10px;
+    }
+
+    .vocab-container::-webkit-scrollbar-thumb:hover {
+      background: #6c5ce7;
+    }
+
+    @media (max-width: 500px) {
+      .modal { padding: 20px 16px; max-width: 96%; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 23px; }
+      .bee, .bee-big { font-size: 80px; }
+      .btn { padding: 12px 30px; font-size: 16px; }
+      .vocab-table { font-size: 13.5px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Pop-up chào mừng -->
+<div class="modal-overlay" id="welcomeModal">
+  <div class="modal" id="welcomeContent">
+    <button class="close-btn" id="closeWelcome">×</button>
+    <div class="bee">🐝</div>
+    <h2>Chào bạn!</h2>
+    <p>Hãy cùng chú ong chăm chỉ này làm bài tập về nhà nhé!<br>Bạn đã sẵn sàng chưa?</p>
+    
+    <div class="btn-group">
+      <button class="btn btn-vocab" id="btnVocab">Xem từ vựng trước 📚</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btnReady">Sẵn sàng ✧</button>
+      <button class="btn btn-secondary" id="btnNotYet">Chưa đâu ૮₍ ˶•⤙•˶ ₎ა</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal từ vựng -->
+<div class="modal-overlay" id="vocabModal">
+  <div class="modal" id="vocabContent">
+    <button class="close-btn" id="closeVocab">×</button>
+    <h2>Từ vựng bài học</h2>
+    <p style="font-size: 15.5px;">Hãy xem và ghi nhớ trước khi bắt đầu nhé! 🐝</p>
+    
+    <div class="vocab-container">
+      <table class="vocab-table">
+        <thead>
+          <tr>
+            <th>Từ / Cụm từ</th>
+            <th>Phiên âm</th>
+            <th>Loại từ</th>
+            <th>Nghĩa tiếng Việt</th>
+            <th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="word">geocaching</td><td>/ˈdʒiːəʊˌkæʃɪŋ/</td><td>n</td><td>trò tìm kho báu bằng GPS</td><td></td></tr>
+          <tr><td class="word">container</td><td>/kənˈteɪnər/</td><td>n</td><td>hộp chứa</td><td></td></tr>
+          <tr><td class="word">countryside</td><td>/ˈkʌntrisaɪd/</td><td>n</td><td>vùng nông thôn</td><td></td></tr>
+          <tr><td class="word">location</td><td>/ləʊˈkeɪʃən/</td><td>n</td><td>vị trí</td><td></td></tr>
+          <tr><td class="word">race (v)</td><td>/reɪs/</td><td>v</td><td>chạy đua</td><td></td></tr>
+          <tr><td class="word">initial</td><td>/ɪˈnɪʃəl/</td><td>adj</td><td>ban đầu</td><td></td></tr>
+          <tr><td class="word">adventure</td><td>/ədˈventʃər/</td><td>n</td><td>cuộc phiêu lưu</td><td></td></tr>
+          <tr><td class="word">well-planned</td><td>/ˌwel ˈplænd/</td><td>adj</td><td>được chuẩn bị kỹ</td><td></td></tr>
+          <tr><td class="word">technology</td><td>/tekˈnɒlədʒi/</td><td>n</td><td>công nghệ</td><td></td></tr>
+          <tr><td class="word">equipment</td><td>/ɪˈkwɪpmənt/</td><td>n</td><td>thiết bị</td><td></td></tr>
+          <tr><td class="word">lend</td><td>/lend/</td><td>v</td><td>cho mượn</td><td></td></tr>
+          <tr><td class="word">participate</td><td>/pɑːˈtɪsɪpeɪt/</td><td>v</td><td>tham gia</td><td>= take part</td></tr>
+          <tr><td class="word">create</td><td>/kriˈeɪt/</td><td>v</td><td>tạo ra</td><td></td></tr>
+          <tr><td class="word">community</td><td>/kəˈmjuːnəti/</td><td>n</td><td>cộng đồng</td><td></td></tr>
+          <tr><td class="word">respect</td><td>/rɪˈspekt/</td><td>v</td><td>tôn trọng</td><td></td></tr>
+          <tr><td class="word">environment</td><td>/ɪnˈvaɪrənmənt/</td><td>n</td><td>môi trường</td><td></td></tr>
+          <tr><td class="word">invasion</td><td>/ɪnˈveɪʒən/</td><td>n</td><td>sự xâm nhập</td><td></td></tr>
+          <tr><td class="word">motivation</td><td>/ˌməʊtɪˈveɪʃən/</td><td>n</td><td>động lực</td><td></td></tr>
+          <tr><td class="word">realise</td><td>/ˈrɪəlaɪz/</td><td>v</td><td>nhận ra</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pop-up đếm ngược -->
+<div class="modal-overlay" id="countdownModal">
+  <div class="modal" id="countdownContent">
+    <div class="bee">🐝💨</div>
+    <h2>Nhanh lên nào!</h2>
+    <p>Bạn có <strong>30 giây</strong> để sẵn sàng<br>Không sẵn sàng cũng phải làm bài đấy nhé!</p>
+    
+    <div class="countdown" id="timer">30</div>
+    
+    <div class="small-text">Đang đếm ngược... ⏳</div>
+  </div>
+</div>
+
+<!-- Màn hình chính khi tắt pop-up -->
+<div id="mainScreen" class="hidden">
+  <div class="bee-big">🐝✨</div>
+  <h1>Chào các em!</h1>
+  <p>Hãy làm bài tập để ngày càng tiến bộ nhé! 💪📚</p>
+  <button class="btn btn-primary" id="btnStartMain" style="font-size: 20px; padding: 18px 48px; margin-top: 32px;">
+    Bắt đầu làm bài 🚀
+  </button>
+</div>
+
+<script>
+  const welcomeOverlay   = document.getElementById('welcomeModal');
+  const vocabOverlay     = document.getElementById('vocabModal');
+  const countdownOverlay = document.getElementById('countdownModal');
+  const mainScreen       = document.getElementById('mainScreen');
+
+  const welcomeContent   = document.getElementById('welcomeContent');
+  const vocabContent     = document.getElementById('vocabContent');
+  const countdownContent = document.getElementById('countdownContent');
+
+  function showModal(overlay, content) {
+    overlay.classList.add('active');
+    setTimeout(() => content.classList.add('active'), 50);
+  }
+
+  function hideModal(overlay, content) {
+    content.classList.remove('active');
+    setTimeout(() => overlay.classList.remove('active'), 400);
+  }
+
+  function showMainScreen() {
+    mainScreen.classList.remove('hidden');
+  }
+
+  function hideAllModals() {
+    [welcomeOverlay, vocabOverlay, countdownOverlay].forEach(ov => {
+      ov.classList.remove('active');
+    });
+  }
+
+  // Load trang → hiện pop-up chào mừng
+  window.addEventListener('load', () => {
+    showModal(welcomeOverlay, welcomeContent);
+  });
+
+  // Xem từ vựng
+  document.getElementById('btnVocab').addEventListener('click', () => {
+    showModal(vocabOverlay, vocabContent);
+  });
+
+  // Đóng modal từ vựng → quay về welcome hoặc main nếu welcome đã đóng
+  document.getElementById('closeVocab').addEventListener('click', () => {
+    hideModal(vocabOverlay, vocabContent);
+    if (!welcomeOverlay.classList.contains('active')) {
+      hideAllModals();
+      showMainScreen();
+    }
+  });
+
+  // Đóng pop-up chào mừng → hiện màn hình chính
+  document.getElementById('closeWelcome').addEventListener('click', () => {
+    hideModal(welcomeOverlay, welcomeContent);
+    hideAllModals();
+    showMainScreen();
+  });
+
+  // Sẵn sàng → đi thẳng link
+  document.getElementById('btnReady').addEventListener('click', () => {
+    window.location.href = "https://www.liveworksheets.com/c?a=s&g=PET&s=B1&t=Yqy7FnAHYs&sr=y&is=y&ia=y&l=w5&i=otdxnsx&r=pp&f=dzdxzuzf&ms=uz&cd=p-ti3-l---piiiu8jznmlpmhhngnmgxgexg&mw=hs";
+  });
+
+  // Chưa → countdown
+  document.getElementById('btnNotYet').addEventListener('click', () => {
+    hideModal(welcomeOverlay, welcomeContent);
+    setTimeout(() => {
+      showModal(countdownOverlay, countdownContent);
+      startCountdown();
+    }, 450);
+  });
+
+  // Từ màn hình chính: Bắt đầu làm bài
+  document.getElementById('btnStartMain').addEventListener('click', () => {
+    window.location.href = "https://www.liveworksheets.com/c?a=s&g=PET&s=B1&t=Yqy7FnAHYs&sr=y&is=y&ia=y&l=w5&i=otdxnsx&r=pp&f=dzdxzuzf&ms=uz&cd=p-ti3-l---piiiu8jznmlpmhhngnmgxgexg&mw=hs";
+  });
+
+  function startCountdown() {
+    let timeLeft = 30;
+    const timerEl = document.getElementById('timer');
+    
+    const interval = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = timeLeft;
+
+      if (timeLeft <= 10) {
+        timerEl.style.color = timeLeft <= 5 ? '#d63031' : '#e67e22';
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        window.location.href = "https://www.liveworksheets.com/c?a=s&g=PET&s=B1&t=Yqy7FnAHYs&sr=y&is=y&ia=y&l=w5&i=otdxnsx&r=pp&f=dzdxzuzf&ms=uz&cd=p-ti3-l---piiiu8jznmlpmhhngnmgxgexg&mw=hs";
+      }
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
